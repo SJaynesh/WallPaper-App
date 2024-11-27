@@ -3,7 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wallpaper_app/controller/wall_paper_controller.dart';
-import 'package:wallpaper_app/models/wall_paper_model.dart';
+
+import '../../models/wall_paper_model.dart';
 
 TextEditingController searchController = TextEditingController();
 
@@ -45,9 +46,10 @@ class HomePage extends StatelessWidget {
                   child: FloatingActionButton(
                     onPressed: () {
                       log("Search btn is tapped...");
-                      // image = searchController.text;
                       Provider.of<WallPaperController>(context, listen: false)
-                          .getSearchData(search: searchController.text);
+                          .getSearchData(
+                        search: searchController.text,
+                      );
                     },
                     child: const Icon(Icons.search),
                   ),
@@ -62,13 +64,13 @@ class HomePage extends StatelessWidget {
                   builder: (context, provider, _) {
                 return FutureBuilder(
                   future: provider.getWallPaper(),
-                  builder: (BuildContext context, AsyncSnapshot snapShot) {
-                    if (snapShot.hasError) {
+                  builder: (BuildContext context, AsyncSnapshot snapShop) {
+                    if (snapShop.hasError) {
                       return Center(
-                        child: Text("ERROR : ${snapShot.error}"),
+                        child: Text("ERROR : ${snapShop.error}"),
                       );
-                    } else if (snapShot.hasData) {
-                      List<Hit> wallPaper = snapShot.data;
+                    } else if (snapShop.hasData) {
+                      List<Hit> wallpaper = snapShop.data;
                       return GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
@@ -77,24 +79,32 @@ class HomePage extends StatelessWidget {
                           crossAxisSpacing: 8,
                           childAspectRatio: 0.7,
                         ),
-                        itemBuilder: (context, index) => Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(16),
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                wallPaper[index].largeImageUrl,
+                        itemBuilder: (context, index) => GestureDetector(
+                          onTap: () async {
+                            // await AsyncWallpaper.setWallpaper(
+                            //   url: wallPaper[index].largeImageUrl,
+                            // );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey,
+                              borderRadius: BorderRadius.circular(16),
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                  wallpaper[index].largeImageUrl,
+                                ),
+                                fit: BoxFit.cover,
                               ),
-                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                        itemCount: wallPaper.length,
+                        itemCount: wallpaper.length,
+                      );
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(),
                       );
                     }
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
                   },
                 );
               }),
